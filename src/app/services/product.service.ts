@@ -10,19 +10,19 @@ import { tap, type catchError } from "rxjs";
 export class ProductService {
 	private urlBackend = environment.urlApi;
 	private http = inject(HttpClient)
-	public productos = signal<Product[]>([])
+	public productos = signal<Product[]>([]) // Sirve para almacenar en tiempo real los cambios
 
 	constructor() {
 		this.obtenerProductos().subscribe()
 	}
 
 	obtenerProductos() {
-		return this.http.get(`${this.urlBackend}/api/products`).pipe(tap((respuesta: any) => this.productos.set(respuesta.productos)))
+		return this.http.get<Product[]>(`${this.urlBackend}/api/products`).pipe(tap((respuesta) => this.productos.set(respuesta)))
 	}
 
-	obtenerProducto(id: number) {
-		return this.http.get(`${this.urlBackend}/api/products/${id}`)
-	}
+	// obtenerProducto(id: number) {
+	// 	return this.http.get(`${this.urlBackend}/api/products/${id}`)
+	// }
 
 	registrarProducto(producto: any) {
 		return this.http.post(`${this.urlBackend}/api/products`, producto).pipe(tap((respuesta: any) => this.productos.update((productosAnteriores => [...productosAnteriores, respuesta]))));

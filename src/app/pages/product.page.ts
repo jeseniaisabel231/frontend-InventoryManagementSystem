@@ -1,7 +1,8 @@
 import { Component, effect, inject, signal } from "@angular/core";
 import { ProductService } from "../services/product.service";
 import { Product } from "../interfaces/product.interface";
-import { FormProductComponent } from "../components/admin/formProduct.component";
+import { FormProductComponent, type Actions } from "../components/admin/formProduct.component";
+import { DisplayComponent } from "../components/admin/display.component";
 
 @Component({
   template: `<div class="flex h-screen bg-[#F5F6FA] font-sans text-gray-800">
@@ -158,7 +159,9 @@ import { FormProductComponent } from "../components/admin/formProduct.component"
                   </td>
                   <td class="py-4 px-6 text-sm">
                      <div class="flex items-center gap-2">
-                       <button class="px-3 py-1 border border-gray-200 text-gray-600 rounded text-xs hover:bg-gray-50 hover:border-gray-300">Ver</button>
+                       <button class="px-3 py-1 border border-gray-200 text-gray-600 rounded text-xs hover:bg-gray-50 hover:border-gray-300"
+                      (click)="showFormCreate()"
+                       >Ver</button>
                        <button class="px-3 py-1 border border-gray-200 text-gray-600 rounded text-xs hover:bg-gray-50 hover:border-gray-300">Actualizar</button>
                        <button class="px-3 py-1 border border-red-100 text-red-600 bg-red-50 rounded text-xs hover:bg-red-100">Eliminar</button>
                      </div>
@@ -169,28 +172,33 @@ import { FormProductComponent } from "../components/admin/formProduct.component"
               
           </tbody>
         </table>
-        <form-product-component></form-product-component>
+        <display-component [productInput]="infoProduct()"></display-component>
+        <form-product-component [actions]="actions()"></form-product-component>
       </div>
 
     </main>
   </div>
 </div>`,
-  imports: [FormProductComponent],
+  imports: [FormProductComponent, DisplayComponent],
 })
 export class ProductPage {
   public productService = inject(ProductService)
-  public producto = signal<Product>({} as Product)
-  public id = signal<number>(0)
+  public infoProduct = signal<Product | null>(null)
+  public actions = signal<Actions>('Visualizar');
+  public assignedAction = signal<Actions> ('Crear')
+  public formData = signal<Product | null>(null);
+  public showModal = signal<boolean>(false);
 
-  constructor() {
-    effect(() => {
-      const id = this.id()
 
-      this.productService.obtenerProducto(id).subscribe({
-        next: (respuesta: any) => {
-          this.producto.set(respuesta)
-        }
-      })
-    })
+  public showInfo(product: Product) {
+    this.infoProduct.set(product)
+  }
+
+  public showFormCreate (){
+    this.assignedAction.set('Crear');
+    this.formData.set(null);
+    this.showModal.set(true)
+
+
   }
 }
